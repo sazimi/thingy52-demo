@@ -1,0 +1,8 @@
+body{
+    font-family: 'Lato', sans-serif;
+}
+.container {
+    width: 850px;
+    margin: 70px auto 0px auto;
+    text-align: center;
+}

@@ -1,0 +1,12 @@
+<button class="fancy-button" (click)="getTemperture()">Connect</button>
+
+<div *ngIf="device?.name">
+  Hallo, my name is {{device.name}}
+</div>
+
+<div *ngIf="tempurture" class="main__shadow">
+  <div id="shadow-info" class="shadow__info">
+    <h1 name="title" id="tempurture" role="header" class="shadow__title">Current tempurture</h1>
+    <p name="description" id="description" class="shadow__description">{{ tempurture }} Celcious</p>
+  </div>
+</div>

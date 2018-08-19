@@ -1,0 +1,46 @@
+:host{
+    text-align: center;
+}
+.fancy-button {
+    text-align: center;
+    display: inline-block;
+    position: relative;
+    text-decoration: none;
+    color: #fff;
+    text-transform: capitalize;
+    background-color: #541388;
+    font-size: 18px;
+    padding: 20px 0px;
+    width: 150px;
+    -webkit-border-radius: 6;
+    -moz-border-radius: 6;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.fancy-button:hover {
+    color: #541388;
+    background-color: #fff;
+}
+button:focus {outline:0;}
+
+.main__shadow {
+    margin: 20px;
+    min-width: 600px;
+    min-height: 100px;
+    background-color: #fff;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2),
+    0 1px 5px 0 rgba(0, 0, 0, 0.12);
+    border-radius: 2px;
+}  
+.shadow__info {
+    padding: 1% 4% 0 4%;
+    color: var(--color, #4a4a4a);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.shadow__title {
+    font-size: 1em;
+}
+.shadow__description {
+    font-size: 0.7em;
+}

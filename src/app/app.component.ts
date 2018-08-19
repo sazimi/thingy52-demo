@@ -2,7 +2,10 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'th-root',
-  templateUrl: './app.component.html',
+  template: `
+  <div class="container">
+    <th-info-card></th-info-card>
+  </div>`,
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
