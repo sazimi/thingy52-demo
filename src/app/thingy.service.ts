@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
-import { map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap, buffer } from 'rxjs/operators';
 
 import { BluetoothCore } from '@manekinekko/angular-web-bluetooth';
+import { Observable, of } from 'rxjs';
+import { IResult, Sensor } from './thingy.model';
 
 @Injectable({
   providedIn: 'root'
 })
+
 export class ThingyService {
 
   static GATT_CHARACTERISTIC_BATTERY_LEVEL = 'battery_level';
@@ -19,25 +22,35 @@ export class ThingyService {
 
   constructor(public ble: BluetoothCore) { }
 
-  service;
+  service: Observable<void | BluetoothRemoteGATTServer>;
+
+  humidity: BluetoothRemoteGATTCharacteristic;
+
   getFakeValue() {
     this.ble.fakeNext();
   }
 
-  getDevice() {
-    return this.ble.getDevice$();
-  }
-
+  // this one is not enough for listening to more than one sensor 
   streamValues() {
-    // call this method to get a stream of values emitted by the device
     return this.ble.streamValues$().pipe(map((value: DataView) => value.getUint8(0)));
   }
 
-  getTempurture() {
-    console.log('Getting Tempurture Service...');
+  /// I want to be able to return something like this
+  // streamValues() {
+  //   return this.ble.streamValues$().pipe(map((value: DataView) => {
+  //     return {
+  //       value: value.getUint8(0),
+  //       type: Sensor.TEMPERATURE
+  //     }
+  //   }));
 
+  // }
+
+  
+
+  connect(): Observable<void | BluetoothRemoteGATTServer> {
     try {
-      this.service = this.ble
+      return this.service = this.ble
         .discover$({
           acceptAllDevices: true,
           optionalServices: [
@@ -46,29 +59,70 @@ export class ThingyService {
             ThingyService.GATT_ENVIRONMENT_SERVICE
           ]
         });
-
-
-      return this.service.pipe(
-        mergeMap((gatt: BluetoothRemoteGATTServer) => {
-          return this.ble.getPrimaryService$(
-            gatt,
-            ThingyService.GATT_ENVIRONMENT_SERVICE
-          );
-        }),
-        mergeMap((primaryService: BluetoothRemoteGATTService) => {
-          console.log('Primary:', primaryService)
-          return this.ble.getCharacteristic$(
-            primaryService,
-            ThingyService.GATT_CHARACTERISTIC_TEMPERTURE
-          );
-        }),
-        mergeMap((characteristic: BluetoothRemoteGATTCharacteristic) => {
-          return this.ble.readValue$(characteristic);
-        }),
-        map((value: DataView) => value.getUint8(0))
-      );
     } catch (e) {
       console.error('Oops! can not read value from %s');
     }
+  }
+
+  getHumidity(thingy): Observable<IResult> {
+    console.log('Getting ENVIRONMENT Service...');
+
+    return thingy.pipe(
+      mergeMap((gatt: BluetoothRemoteGATTServer) => {
+        return this.ble.getPrimaryService$(
+          gatt,
+          ThingyService.GATT_ENVIRONMENT_SERVICE
+        );
+      }),
+      mergeMap((primaryService: BluetoothRemoteGATTService) => {
+        return this.ble.getCharacteristic$(
+          primaryService,
+          ThingyService.GATT_CHARACTERISTIC_HUMIDITY
+        );
+      }),
+      mergeMap((characteristic: BluetoothRemoteGATTCharacteristic) => {
+        this.humidity = characteristic;
+        return this.ble.readValue$(characteristic);
+      }),
+      map((value: DataView) => value.getUint8(0))
+      // I want to return this one instead 
+      // map((value: DataView) => {
+      //   return {
+      //     value: value.getUint8(0),
+      //     type: Sensor.HUMIDITY
+      //   }
+      // })
+    );
+  }
+
+  getTemperature(thingy): Observable<IResult> {
+    console.log('Getting ENVIRONMENT Service...');
+
+    return thingy.pipe(
+      mergeMap((gatt: BluetoothRemoteGATTServer) => {
+        return this.ble.getPrimaryService$(
+          gatt,
+          ThingyService.GATT_ENVIRONMENT_SERVICE
+        );
+      }),
+      mergeMap((primaryService: BluetoothRemoteGATTService) => {
+        return this.ble.getCharacteristic$(
+          primaryService,
+          ThingyService.GATT_CHARACTERISTIC_TEMPERTURE
+        );
+      }),
+      mergeMap((characteristic: BluetoothRemoteGATTCharacteristic) => {
+        return this.ble.readValue$(characteristic);
+      }),
+      map((value: DataView) => value.getUint8(0))
+    //   map((value: DataView) => {
+    //     return {
+    //       value: value.getUint8(0),
+    //       type: Sensor.TEMPERATURE
+    //     }
+    //   }
+    //   )
+    );
+
   }
 }

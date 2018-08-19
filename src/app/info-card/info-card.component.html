@@ -1,12 +1,13 @@
-<button class="fancy-button" (click)="getTemperture()">Connect</button>
+<button class="fancy-button" (click)="connect()">Connect</button>
 
-<div *ngIf="device?.name">
-  Hallo, my name is {{device.name}}
-</div>
-
-<div *ngIf="tempurture" class="main__shadow">
+<div *ngIf="temperature || humidity" class="main__shadow">
   <div id="shadow-info" class="shadow__info">
-    <h1 name="title" id="tempurture" role="header" class="shadow__title">Current tempurture</h1>
-    <p name="description" id="description" class="shadow__description">{{ tempurture }} Celcious</p>
+    <h1 *ngIf="device?.name" name="title" id="temperature" role="header" class="shadow__title">
+      ¡Hola!, me llamo {{device.name}}...
+    </h1>
+
+    <h1 name="title" id="temperature" role="header" class="shadow__title">Environment:</h1>
+    <p *ngIf="temperature" name="temperature" id="temperature" class="shadow__description">Temperature: {{ temperature }} Celcious</p>
+    <p *ngIf="humidity" name="humidity" id="humidity" class="shadow__description">Humidity: {{ humidity }} %</p>
   </div>
 </div>

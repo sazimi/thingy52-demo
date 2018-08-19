@@ -1,7 +1,11 @@
 import { Component, OnInit, NgZone } from '@angular/core';
 import { BluetoothCore } from '@manekinekko/angular-web-bluetooth';
+import { Observable } from 'rxjs';
 
 import { ThingyService } from '../thingy.service';
+
+import { mergeMap } from 'rxjs/operators';
+import { IResult, Sensor } from '../thingy.model';
 
 @Component({
   selector: 'th-info-card',
@@ -10,8 +14,9 @@ import { ThingyService } from '../thingy.service';
 })
 export class InfoCardComponent implements OnInit {
 
-  tempurture;
-  device: BluetoothDevice;
+  temperature;
+  device;
+  humidity;
 
   constructor(public _zone: NgZone,
     public _thingyService: ThingyService,
@@ -22,41 +27,57 @@ export class InfoCardComponent implements OnInit {
     //this.getDeviceStatus();
   }
 
+
+  // streamValues() {
+  //   this._thingyService.streamValues()
+  //     .subscribe((result) => this.updateView(result));
+  // }
+
   streamValues() {
-    this._thingyService.streamValues().subscribe(this.updateView.bind(this));
-    // const n = this.getFakeValue();
-    // console.log('Fakeeeeeeee',n);
-  }
-
-  getDeviceStatus() {
-    this._thingyService.service.subscribe(
-      (device) => {
-        debugger;
-        if (device) {
-          this.device = device;
-        }
+    this._thingyService.streamValues().subscribe((value)=>{
+      // Temp solution 
+      const data= {
+        value: value,
+        type: Sensor.HUMIDITY
       }
-    );
+      this.updateView(data);
+    });
   }
 
-  getTemperture() {
-    this._thingyService.getTempurture().subscribe(() => {
-      this.updateView.bind(this);
-    }
-    );
-  }
+
 
   connect() {
-    console.log('I am connected');
+    const t = this._thingyService.connect();
+    this._thingyService.getTemperature(t).subscribe((result) => this.updateView(result));
+    this._thingyService.getHumidity(t).subscribe(this.updateView.bind(this));
+    this.updateDevice(t)
   }
 
-  updateView(value) {
+  updateDevice(thingy: Observable<void | BluetoothRemoteGATTServer>) {
+    thingy.subscribe((t: BluetoothRemoteGATTServer) => {
+      if (t.connected) {
+        this._zone.run(() => {
+          this.device = t.device;
+        });
+      }
+    })
+
+  }
+  updateView(result: IResult) {
     // force change detection
     this._zone.run(() => {
-      console.log('Reading battery level %d', value);
-      this.tempurture = '' + value;
+      console.log('UPDATING THE VIEW %d', result.value, result.type);
+      switch (result.type) {
+        case Sensor.HUMIDITY:
+          this.humidity = result.value
+          break;
+        case Sensor.TEMPERATURE:
+          this.temperature = result.value
+          break;
+        default:
+          console.log(result)
+      }
 
-      console.log(this.tempurture);
     });
   }
 
