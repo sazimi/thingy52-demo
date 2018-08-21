@@ -1,5 +1,5 @@
 import { Component, OnInit, NgZone } from '@angular/core';
-import { BluetoothCore } from '@manekinekko/angular-web-bluetooth';
+import { BluetoothCore } from '../ble/public_api';
 import { Observable } from 'rxjs';
 
 import { ThingyService } from '../thingy.service';
@@ -17,6 +17,7 @@ export class InfoCardComponent implements OnInit {
   temperature;
   device;
   humidity;
+  motion;
 
   constructor(public _zone: NgZone,
     public _thingyService: ThingyService,
@@ -34,12 +35,16 @@ export class InfoCardComponent implements OnInit {
   // }
 
   streamValues() {
-    this._thingyService.streamValues().subscribe((value)=>{
+    this._thingyService.streamValues().subscribe((value) => {
       // Temp solution 
-      const data= {
-        value: value,
-        type: Sensor.HUMIDITY
-      }
+      const data = {
+        value,
+        type: Sensor.MOTION
+      };
+
+      console.log(value);
+
+
       this.updateView(data);
     });
   }
@@ -48,9 +53,10 @@ export class InfoCardComponent implements OnInit {
 
   connect() {
     const t = this._thingyService.connect();
-    this._thingyService.getTemperature(t).subscribe((result) => this.updateView(result));
-    this._thingyService.getHumidity(t).subscribe(this.updateView.bind(this));
-    this.updateDevice(t)
+    // this._thingyService.getTemperature(t).subscribe((result) => this.updateView(result));
+    // this._thingyService.getHumidity(t).subscribe(this.updateView.bind(this));
+    this._thingyService.getMotion(t).subscribe(this.updateView.bind(this));
+    this.updateDevice(t);
   }
 
   updateDevice(thingy: Observable<void | BluetoothRemoteGATTServer>) {
@@ -60,22 +66,24 @@ export class InfoCardComponent implements OnInit {
           this.device = t.device;
         });
       }
-    })
-
+    });
   }
-  updateView(result: IResult) {
+  updateView(result: any) {
     // force change detection
     this._zone.run(() => {
       console.log('UPDATING THE VIEW %d', result.value, result.type);
       switch (result.type) {
         case Sensor.HUMIDITY:
-          this.humidity = result.value
+          this.humidity = result.value;
           break;
         case Sensor.TEMPERATURE:
-          this.temperature = result.value
+          this.temperature = result.value;
+          break;
+        case Sensor.MOTION:
+          this.motion = result.value;
           break;
         default:
-          console.log(result)
+          console.log(result);
       }
 
     });

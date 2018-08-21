@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
 import { InfoCardComponent } from './info-card/info-card.component';
-import { WebBluetoothModule } from '@manekinekko/angular-web-bluetooth';
+import { WebBluetoothModule, BrowserWebBluetooth } from './ble/public_api';
 
 @NgModule({
   declarations: [
@@ -16,7 +16,9 @@ import { WebBluetoothModule } from '@manekinekko/angular-web-bluetooth';
       enableTracing: true
     })
   ],
-  providers: [],
+  providers: [
+    BrowserWebBluetooth
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

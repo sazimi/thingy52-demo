@@ -1,6 +1,7 @@
 export enum Sensor {
     TEMPERATURE = "temperature",
-    HUMIDITY = "humidity"
+    HUMIDITY = "humidity",
+    MOTION = "motion",
 }
 
 export interface IResult {
